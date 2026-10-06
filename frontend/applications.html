@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CampusHire | My Applications</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+
+    <nav>
+
+        <h2>CampusHire</h2>
+
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Profile</a>
+            <a href="companies.html">Companies</a>
+            <a href="applications.html">Applications</a>
+        </div>
+
+    </nav>
+
+
+    <!-- Main Content -->
+
+    <main class="container">
+
+        <p style="color:#4f46e5; font-weight:700;">
+            PLACEMENT TRACKER
+        </p>
+
+        <h1>My Applications 📋</h1>
+
+        <p>
+            Track every opportunity you've applied for
+            and monitor your placement progress.
+        </p>
+
+
+        <!-- Applications -->
+
+        <div id="applicationList" style="margin-top:30px;"></div>
+
+
+        <br>
+
+        <a href="companies.html">
+            <button>
+                Explore More Companies →
+            </button>
+        </a>
+
+    </main>
+
+
+    <script>
+
+        const student =
+            JSON.parse(localStorage.getItem("student"));
+
+        const applicationList =
+            document.getElementById("applicationList");
+
+
+        if (!student) {
+
+            applicationList.innerHTML = `
+
+                <div class="card">
+
+                    <h2>Login Required</h2>
+
+                    <p>
+                        Please login to view your applications.
+                    </p>
+
+                    <br>
+
+                    <a href="login.html">
+                        <button>Go to Login</button>
+                    </a>
+
+                </div>
+
+            `;
+
+        } else {
+
+
+            fetch(
+                "http://localhost:3000/api/applications/" +
+                student.email
+            )
+
+            .then(response => response.json())
+
+            .then(applications => {
+
+
+                if (applications.length === 0) {
+
+                    applicationList.innerHTML = `
+
+                        <div class="card"
+                            style="text-align:center; padding:50px;">
+
+                            <div style="
+                                font-size:50px;
+                                margin-bottom:15px;
+                            ">
+                                📭
+                            </div>
+
+                            <h2>
+                                No applications yet
+                            </h2>
+
+                            <p>
+                                Start exploring companies
+                                and apply for your first opportunity.
+                            </p>
+
+                            <br>
+
+                            <a href="companies.html">
+                                <button>
+                                    Explore Companies
+                                </button>
+                            </a>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+
+                applications.forEach(application => {
+
+
+                    let statusClass =
+                        "status-applied";
+
+
+                    if (
+                        application.status ===
+                        "Under Review"
+                    ) {
+
+                        statusClass =
+                            "status-review";
+
+                    }
+
+
+                    if (
+                        application.status ===
+                        "Shortlisted"
+                    ) {
+
+                        statusClass =
+                            "status-shortlisted";
+
+                    }
+
+
+                    if (
+                        application.status ===
+                        "Rejected"
+                    ) {
+
+                        statusClass =
+                            "status-rejected";
+
+                    }
+
+
+                    const appliedDate =
+                        new Date(
+                            application.appliedDate
+                        ).toLocaleDateString(
+                            "en-IN",
+                            {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric"
+                            }
+                        );
+
+
+                    let nextStep =
+                        "Wait for company review";
+
+
+                    if (
+                        application.status ===
+                        "Under Review"
+                    ) {
+
+                        nextStep =
+                            "Your application is being reviewed";
+
+                    }
+
+
+                    if (
+                        application.status ===
+                        "Shortlisted"
+                    ) {
+
+                        nextStep =
+                            "Prepare for the next selection round 🎉";
+
+                    }
+
+
+                    if (
+                        application.status ===
+                        "Rejected"
+                    ) {
+
+                        nextStep =
+                            "Explore other opportunities";
+
+                    }
+
+
+                    applicationList.innerHTML += `
+
+                        <div class="application-card">
+
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:flex-start;
+                                gap:20px;
+                                flex-wrap:wrap;
+                            ">
+
+                                <div>
+
+                                    <div style="
+                                        width:48px;
+                                        height:48px;
+                                        border-radius:13px;
+                                        background:#eef2ff;
+                                        display:flex;
+                                        align-items:center;
+                                        justify-content:center;
+                                        font-size:22px;
+                                        margin-bottom:15px;
+                                    ">
+                                        🏢
+                                    </div>
+
+                                    <h2>
+                                        ${application.company}
+                                    </h2>
+
+                                    <p>
+                                        ${application.role}
+                                    </p>
+
+                                </div>
+
+
+                                <span class="
+                                    status ${statusClass}
+                                ">
+                                    ${application.status}
+                                </span>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <div style="
+                                display:grid;
+                                grid-template-columns:
+                                repeat(auto-fit,minmax(180px,1fr));
+                                gap:18px;
+                            ">
+
+                                <div>
+
+                                    <p style="font-size:13px;">
+                                        APPLIED DATE
+                                    </p>
+
+                                    <strong>
+                                        ${appliedDate}
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <p style="font-size:13px;">
+                                        NEXT STEP
+                                    </p>
+
+                                    <strong>
+                                        ${nextStep}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                });
+
+            })
+
+
+            .catch(error => {
+
+                console.log(error);
+
+                applicationList.innerHTML = `
+
+                    <div class="card">
+
+                        <h2>
+                            Unable to load applications
+                        </h2>
+
+                        <p>
+                            Please make sure the
+                            CampusHire backend is running.
+                        </p>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+    </script>
+
+</body>
+
+</html>

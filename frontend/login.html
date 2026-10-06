@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Login - CampusHire</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Student Login</h1>
+
+    
+
+    <input type="email"id="email" placeholder="Enter your email">
+    <br><br>
+
+    <input type="password"id="password" placeholder="Enter password">
+    <br><br>
+
+    <button onclick="login()">Login</button>
+    <br><br>
+
+<a href="register.html">
+    <button>New Student? Register</button>
+</a>
+     
+    <script>
+
+    async function login() {
+
+        let email = document.getElementById("email").value;
+        let password = document.getElementById("password").value;
+
+        if (email === "" || password === "") {
+
+            alert("Please enter your email and password");
+            return;
+
+        }
+
+        try {
+
+            const response = await fetch("http://localhost:3000/api/login", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+
+                // Save logged-in student for dashboard/profile
+                localStorage.setItem(
+                    "student",
+                    JSON.stringify(data.student)
+                );
+
+                alert("Login successful!");
+
+                window.location.href = "dashboard.html";
+
+            } else {
+
+                alert(data.message);
+
+            }
+
+        } catch (error) {
+
+            alert("Server connection failed");
+
+            console.log(error);
+
+        }
+
+    }
+
+</script>
+</body>
+
+</html>

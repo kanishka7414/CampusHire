@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CampusHire | Student Profile</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+
+    <nav>
+
+        <h2>CampusHire</h2>
+
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Profile</a>
+            <a href="companies.html">Companies</a>
+            <a href="applications.html">Applications</a>
+        </div>
+
+    </nav>
+
+
+    <!-- Main Content -->
+
+    <main class="container">
+
+        <p style="color:#4f46e5; font-weight:700;">
+            STUDENT PROFILE
+        </p>
+
+        <h1>My Profile 👤</h1>
+
+        <p>
+            Your academic and technical profile used for
+            placement eligibility.
+        </p>
+
+
+        <div id="profile" style="margin-top:30px;"></div>
+
+
+        <br>
+
+        <a href="dashboard.html">
+            <button>
+                ← Back to Dashboard
+            </button>
+        </a>
+
+    </main>
+
+
+    <script>
+
+        const student =
+            JSON.parse(localStorage.getItem("student"));
+
+        const profile =
+            document.getElementById("profile");
+
+
+        if (!student) {
+
+            profile.innerHTML = `
+
+                <div class="card">
+
+                    <h2>Login Required</h2>
+
+                    <p>
+                        Please login to view your profile.
+                    </p>
+
+                    <br>
+
+                    <a href="login.html">
+                        <button>
+                            Go to Login
+                        </button>
+                    </a>
+
+                </div>
+
+            `;
+
+        } else {
+
+
+            profile.innerHTML = `
+
+                <div class="card">
+
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:20px;
+                        flex-wrap:wrap;
+                    ">
+
+                        <div style="
+                            width:80px;
+                            height:80px;
+                            border-radius:50%;
+                            background:#eef2ff;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:36px;
+                        ">
+                            👤
+                        </div>
+
+
+                        <div>
+
+                            <p style="
+                                color:#4f46e5;
+                                font-size:13px;
+                                font-weight:700;
+                            ">
+                                STUDENT
+                            </p>
+
+                            <h2>
+                                ${student.name}
+                            </h2>
+
+                            <p>
+                                ${student.email}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <div style="
+                        display:grid;
+                        grid-template-columns:
+                        repeat(auto-fit,minmax(220px,1fr));
+                        gap:20px;
+                    ">
+
+
+                        <div class="card">
+
+                            <p>
+                                CURRENT CGPA
+                            </p>
+
+                            <div style="
+                                font-size:32px;
+                                font-weight:800;
+                                color:#4f46e5;
+                            ">
+                                ${student.cgpa}
+                            </div>
+
+                            <p>
+                                Academic performance
+                            </p>
+
+                        </div>
+
+
+                        <div class="card">
+
+                            <p>
+                                TECHNICAL SKILLS
+                            </p>
+
+                            <h3>
+                                ${student.skills || "Not added yet"}
+                            </h3>
+
+                            <p>
+                                Used for opportunity matching
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <h2>
+                        Placement Readiness
+                    </h2>
+
+                    <br>
+
+                    <div style="
+                        background:#eef2ff;
+                        border-radius:12px;
+                        padding:18px;
+                    ">
+
+                        <p>
+                            Your profile information is used by
+                            CampusHire to check your eligibility
+                            for available placement opportunities.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+    </script>
+
+</body>
+
+</html>

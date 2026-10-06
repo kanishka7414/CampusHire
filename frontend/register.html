@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Registration - CampusHire</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Student Registration</h1>
+
+    <input type="text" id="name" placeholder="Enter your name">
+    <br><br>
+
+    <input type="email" id="email" placeholder="Enter your email">
+    <br><br>
+
+    <input type="number" id="cgpa" placeholder="Enter your CGPA">
+    <br><br>
+
+    <input type="text" id="skills" placeholder="Enter your skills">
+    <br><br>
+
+    <input type="password" id="password" placeholder="Create password">
+    <br><br>
+
+    <button onclick="register()">Register</button>
+
+    <script>
+
+    async function register() {
+
+        let name = document.getElementById("name").value;
+        let email = document.getElementById("email").value;
+        let cgpa = document.getElementById("cgpa").value;
+        let skills = document.getElementById("skills").value;
+        let password = document.getElementById("password").value;
+
+        if (name === "" || email === "" || cgpa === "" || skills === "" || password === "") {
+
+            alert("Please fill all details");
+            return;
+
+        }
+
+        try {
+
+            const response = await fetch("http://localhost:3000/api/students", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    cgpa: Number(cgpa),
+                    skills: skills,
+                    password: password
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+
+                alert("Registration successful!");
+
+                window.location.href = "login.html";
+
+            } else {
+
+                alert(data.message);
+
+            }
+
+        } catch (error) {
+
+            alert("Server connection failed");
+
+            console.log(error);
+
+        }
+
+    }
+
+</script>
+
+</body>
+
+</html>

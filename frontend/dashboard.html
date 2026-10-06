@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CampusHire | Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Navigation -->
+
+    <nav>
+
+    <h2>CampusHire</h2>
+
+    <div>
+
+        <a href="dashboard.html">Dashboard</a>
+        <a href="profile.html">Profile</a>
+        <a href="companies.html">Companies</a>
+        <a href="applications.html">Applications</a>
+        <a href="admin-login.html">Admin Portal</a>
+
+        <button
+            onclick="logout()"
+            style="
+                margin-left:20px;
+                padding:9px 15px;
+                border-radius:9px;
+                font-size:14px;
+            "
+        >
+            Logout
+        </button>
+
+    </div>
+
+</nav>
+
+
+    <!-- Main Dashboard -->
+
+    <main class="container">
+
+        <section>
+
+            <p style="color:#4f46e5; font-weight:700;">
+                STUDENT PORTAL
+            </p>
+
+            <h1>
+                Welcome back, <span id="studentName">Student</span> 👋
+            </h1>
+
+            <p>
+                Track your placement journey, explore opportunities
+                and manage your applications in one place.
+            </p>
+
+        </section>
+
+
+        <!-- Statistics -->
+
+        <section class="dashboard-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-number" id="companyCount">
+                    3
+                </div>
+
+                <div class="stat-label">
+                    Available Companies
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-number" id="applicationCount">
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Applications
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-number" id="eligibleCount">
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Eligible Opportunities
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Quick Actions -->
+
+        <section style="margin-top:35px;">
+
+            <h2>Quick Actions</h2>
+
+            <div class="dashboard-grid">
+
+                <div class="card">
+
+                    <h2>👤 My Profile</h2>
+
+                    <p>
+                        View and manage your student profile,
+                        CGPA and skills.
+                    </p>
+
+                    <br>
+
+                    <a href="profile.html">
+                        <button>View Profile</button>
+                    </a>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h2>💼 Explore Companies</h2>
+
+                    <p>
+                        Discover companies and check your
+                        eligibility before applying.
+                    </p>
+
+                    <br>
+
+                    <a href="companies.html">
+                        <button>View Companies</button>
+                    </a>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h2>📋 My Applications</h2>
+
+                    <p>
+                        Track your applications and
+                        placement status.
+                    </p>
+
+                    <br>
+
+                    <a href="applications.html">
+                        <button>Track Applications</button>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Placement Journey -->
+
+        <section style="margin-top:45px;">
+
+            <h2>Your Placement Journey</h2>
+
+            <div class="card">
+
+                <p style="margin-bottom:20px;">
+                    Follow these steps to move closer to your dream job.
+                </p>
+
+                <div class="dashboard-grid">
+
+                    <div>
+                        <h3>01</h3>
+                        <p>
+                            Complete your profile
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3>02</h3>
+                        <p>
+                            Explore eligible companies
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3>03</h3>
+                        <p>
+                            Apply and track your status
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Dashboard JavaScript -->
+
+    <script>
+
+        const student =
+            JSON.parse(localStorage.getItem("student"));
+
+        if (!student) {
+
+            window.location.href = "login.html";
+
+        } else {
+
+            document.getElementById("studentName").textContent =
+                student.name;
+
+        }
+
+
+        // Get application count
+
+        fetch("http://localhost:3000/api/applications/" + student.email)
+
+            .then(response => response.json())
+
+            .then(applications => {
+
+                document.getElementById("applicationCount").textContent =
+                    applications.length;
+
+            })
+
+            .catch(error => {
+
+                console.log(error);
+
+            });
+
+
+        // Get companies and calculate eligibility
+
+        fetch("http://localhost:3000/api/companies")
+
+            .then(response => response.json())
+
+            .then(companies => {
+
+                const studentCGPA =
+                    Number(student.cgpa);
+
+                const eligibleCompanies =
+                    companies.filter(company =>
+                        studentCGPA >= Number(company.cgpa)
+                    );
+
+                document.getElementById("companyCount").textContent =
+                    companies.length;
+
+                document.getElementById("eligibleCount").textContent =
+                    eligibleCompanies.length;
+
+            })
+
+            .catch(error => {
+
+                console.log(error);
+
+            });
+function logout() {
+
+    localStorage.removeItem("student");
+
+    window.location.href = "login.html";
+
+}
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CampusHire | Explore Companies</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+
+    <nav>
+
+        <h2>CampusHire</h2>
+
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Profile</a>
+            <a href="companies.html">Companies</a>
+            <a href="applications.html">Applications</a>
+        </div>
+
+    </nav>
+
+
+    <!-- Main Content -->
+
+    <main class="container">
+
+        <p style="color:#4f46e5; font-weight:700;">
+            CAREER OPPORTUNITIES
+        </p>
+
+        <h1>Explore Companies 💼</h1>
+
+        <p>
+            Discover placement opportunities and check your
+            eligibility before applying.
+        </p>
+
+
+        <!-- Student eligibility summary -->
+
+        <div class="card" style="margin-top:25px;">
+
+            <h2>Your Eligibility</h2>
+
+            <p>
+                Your current CGPA:
+                <strong id="studentCGPA">-</strong>
+            </p>
+
+        </div>
+
+
+        <!-- Company cards -->
+
+        <div id="companyList" class="company-grid"></div>
+
+    </main>
+
+
+    <script>
+
+        const student =
+            JSON.parse(localStorage.getItem("student"));
+
+        if (!student) {
+
+            alert("Please login first.");
+
+            window.location.href = "login.html";
+
+        }
+
+
+        const studentCGPA =
+            Number(student.cgpa);
+
+        document.getElementById("studentCGPA").textContent =
+            studentCGPA;
+
+
+        fetch("http://localhost:3000/api/companies")
+
+            .then(response => response.json())
+
+            .then(companies => {
+
+                const companyList =
+                    document.getElementById("companyList");
+
+
+                companies.forEach(company => {
+
+                    const eligible =
+                        studentCGPA >= Number(company.cgpa);
+
+
+                    const eligibilityHTML = eligible
+
+                        ? `
+                            <span class="status status-shortlisted">
+                                ✓ Eligible
+                            </span>
+                          `
+
+                        : `
+                            <span class="status status-rejected">
+                                ✕ Not Eligible
+                            </span>
+                          `;
+
+
+                    const buttonHTML = eligible
+
+                        ? `
+                            <button
+                                onclick="applyJob(
+                                    '${company.name}',
+                                    '${company.role}',
+                                    ${studentCGPA},
+                                    ${company.cgpa}
+                                )"
+                            >
+                                Apply Now →
+                            </button>
+                          `
+
+                        : `
+                            <button
+                                disabled
+                                style="
+                                    background:#e5e7eb;
+                                    color:#9ca3af;
+                                    cursor:not-allowed;
+                                "
+                            >
+                                Not Eligible
+                            </button>
+                          `;
+
+
+                    companyList.innerHTML += `
+
+                        <div class="company-card">
+
+                            <div style="
+                                width:52px;
+                                height:52px;
+                                border-radius:14px;
+                                background:#eef2ff;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                font-size:24px;
+                                margin-bottom:18px;
+                            ">
+                                🏢
+                            </div>
+
+
+                            <h2>
+                                ${company.name}
+                            </h2>
+
+
+                            <p style="
+                                font-weight:600;
+                                color:#374151;
+                            ">
+                                ${company.role}
+                            </p>
+
+
+                            <hr>
+
+
+                            <p>
+                                <strong>Minimum CGPA</strong>
+                            </p>
+
+                            <p>
+                                ${company.cgpa}
+                            </p>
+
+
+                            <div style="margin:15px 0;">
+                                ${eligibilityHTML}
+                            </div>
+
+
+                            ${buttonHTML}
+
+                        </div>
+
+                    `;
+
+                });
+
+            })
+
+            .catch(error => {
+
+                console.log(error);
+
+                document.getElementById("companyList").innerHTML = `
+
+                    <div class="card">
+
+                        <h2>Unable to load companies</h2>
+
+                        <p>
+                            Please make sure the CampusHire
+                            backend server is running.
+                        </p>
+
+                    </div>
+
+                `;
+
+            });
+
+
+        function applyJob(
+            company,
+            role,
+            studentCGPA,
+            requiredCGPA
+        ) {
+
+            if (studentCGPA < requiredCGPA) {
+
+                alert(
+                    "You are not eligible for " + company
+                );
+
+                return;
+            }
+
+
+            const student =
+                JSON.parse(localStorage.getItem("student"));
+
+
+            fetch(
+                "http://localhost:3000/api/applications",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        studentEmail: student.email,
+
+                        company: company,
+
+                        role: role
+
+                    })
+
+                }
+            )
+
+            .then(response => response.json())
+
+            .then(data => {
+
+                if (
+                    data.message ===
+                    "Application submitted successfully"
+                ) {
+
+                    alert(
+                        "Application submitted to " +
+                        company +
+                        " 🎉"
+                    );
+
+                } else {
+
+                    alert("Application failed.");
+
+                }
+
+            })
+
+            .catch(error => {
+
+                console.log(error);
+
+                alert(
+                    "Something went wrong while applying."
+                );
+
+            });
+
+        }
+
+    </script>
+
+</body>
+
+</html>

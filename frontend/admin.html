@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CampusHire | Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+
+   <nav>
+
+    <h2>CampusHire</h2>
+
+    <div>
+
+        <a href="dashboard.html">Student Portal</a>
+        <a href="companies.html">Companies</a>
+        <a href="applications.html">Applications</a>
+
+        <button
+            onclick="adminLogout()"
+            style="
+                margin-left:20px;
+                padding:9px 15px;
+                border-radius:9px;
+                font-size:14px;
+            "
+        >
+            Logout
+        </button>
+
+    </div>
+
+</nav>
+
+
+    <!-- Main Content -->
+
+    <main class="container">
+
+        <p style="
+            color:#4f46e5;
+            font-weight:700;
+        ">
+            ADMINISTRATION
+        </p>
+
+        <h1>Placement Management ⚙️</h1>
+
+        <p>
+            Monitor student applications and manage
+            placement application status.
+        </p>
+
+
+        <!-- Statistics -->
+
+        <section class="dashboard-grid">
+
+            <div class="stat-card">
+
+                <div
+                    class="stat-number"
+                    id="totalApplications"
+                >
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Total Applications
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div
+                    class="stat-number"
+                    id="reviewApplications"
+                >
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Under Review
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div
+                    class="stat-number"
+                    id="shortlistedApplications"
+                >
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Shortlisted
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Applications -->
+
+        <section style="margin-top:40px;">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:15px;
+                flex-wrap:wrap;
+            ">
+
+                <div>
+
+                    <h2>
+                        Student Applications
+                    </h2>
+
+                    <p>
+                        Review and update application status.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="applicationList"
+                style="margin-top:20px;"
+            ></div>
+
+        </section>
+
+<!-- Add Company -->
+<!-- Announced Companies -->
+
+<section style="margin-top:40px;">
+
+    <h2>Announced Companies</h2>
+
+    <p>
+        Companies currently available for students.
+    </p>
+
+    <div
+        id="adminCompanyList"
+        class="company-grid"
+        style="margin-top:20px;"
+    ></div>
+
+</section>
+<section style="margin-top:40px;">
+
+    <h2>Add New Company</h2>
+
+    <p>
+        Add a new company opportunity for students.
+    </p>
+
+    <div class="card" style="margin-top:20px;">
+
+        <form id="companyForm">
+
+            <label>Company Name</label>
+            <input
+                type="text"
+                id="companyName"
+                placeholder="Example: Zoho"
+                required
+            >
+
+            <label>Job Role</label>
+            <input
+                type="text"
+                id="companyRole"
+                placeholder="Example: Junior Developer"
+                required
+            >
+
+            <label>Minimum CGPA</label>
+            <input
+                type="number"
+                id="companyCGPA"
+                placeholder="Example: 7.5"
+                step="0.1"
+                min="0"
+                max="10"
+                required
+            >
+
+            <label>Required Skills</label>
+            <input
+                type="text"
+                id="companySkills"
+                placeholder="Example: JavaScript, SQL"
+                required
+            >
+
+            <label>Application Deadline</label>
+            <input
+                type="date"
+                id="companyDeadline"
+                required
+            >
+
+            <button type="submit">
+                ➕ Add Company
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+        <br>
+
+        <a href="dashboard.html">
+
+            <button>
+                ← Back to Student Portal
+            </button>
+
+        </a>
+
+    </main>
+
+
+    <script>
+
+    // Check Admin Login
+
+    const adminLoggedIn =
+        localStorage.getItem("adminLoggedIn");
+
+    if (adminLoggedIn !== "true") {
+
+        window.location.replace(
+            "admin-login.html"
+        );
+
+    }
+
+
+    const applicationList =
+        document.getElementById("applicationList");
+
+
+    fetch("http://localhost:3000/api/applications")
+
+        .then(response => response.json())
+
+        .then(applications => {
+
+
+            document.getElementById(
+                "totalApplications"
+            ).textContent =
+                applications.length;
+
+
+            const reviewCount =
+                applications.filter(
+                    application =>
+                        application.status ===
+                        "Under Review"
+                ).length;
+
+
+            const shortlistedCount =
+                applications.filter(
+                    application =>
+                        application.status ===
+                        "Shortlisted"
+                ).length;
+
+
+            document.getElementById(
+                "reviewApplications"
+            ).textContent =
+                reviewCount;
+
+
+            document.getElementById(
+                "shortlistedApplications"
+            ).textContent =
+                shortlistedCount;
+
+
+            if (applications.length === 0) {
+
+                applicationList.innerHTML = `
+
+                    <div class="card"
+                        style="
+                            text-align:center;
+                            padding:50px;
+                        ">
+
+                        <div style="
+                            font-size:48px;
+                        ">
+                            📭
+                        </div>
+
+                        <h2>
+                            No Applications Yet
+                        </h2>
+
+                        <p>
+                            Student applications will
+                            appear here.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            applications.forEach(application => {
+
+
+                let statusClass =
+                    "status-applied";
+
+
+                if (
+                    application.status ===
+                    "Under Review"
+                ) {
+                    statusClass =
+                        "status-review";
+                }
+
+
+                if (
+                    application.status ===
+                    "Shortlisted"
+                ) {
+                    statusClass =
+                        "status-shortlisted";
+                }
+
+
+                if (
+                    application.status ===
+                    "Rejected"
+                ) {
+                    statusClass =
+                        "status-rejected";
+                }
+
+
+                applicationList.innerHTML += `
+
+                    <div class="admin-card">
+
+                        <div style="
+                            flex:1;
+                            min-width:250px;
+                        ">
+
+                            <div style="
+                                display:flex;
+                                align-items:center;
+                                gap:14px;
+                            ">
+
+                                <div style="
+                                    width:50px;
+                                    height:50px;
+                                    border-radius:14px;
+                                    background:#eef2ff;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    font-size:23px;
+                                ">
+                                    👤
+                                </div>
+
+                                <div>
+
+                                    <h2>
+                                        ${application.company}
+                                    </h2>
+
+                                    <p>
+                                        ${application.role}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div style="
+                                margin-top:18px;
+                            ">
+
+                                <p style="
+                                    font-size:12px;
+                                    font-weight:700;
+                                ">
+                                    STUDENT EMAIL
+                                </p>
+
+                                <strong>
+                                    ${application.studentEmail}
+                                </strong>
+
+                                <br><br>
+
+                                <p style="
+                                    font-size:12px;
+                                    font-weight:700;
+                                ">
+                                    CURRENT STATUS
+                                </p>
+
+                                <span class="
+                                    status
+                                    ${statusClass}
+                                ">
+                                    ${application.status}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div style="min-width:180px;">
+
+                            <p style="
+                                font-size:13px;
+                                font-weight:700;
+                                margin-bottom:7px;
+                            ">
+                                UPDATE STATUS
+                            </p>
+
+                            <select
+                                onchange="
+                                    updateStatus(
+                                        '${application._id}',
+                                        this.value
+                                    )
+                                "
+                                style="margin:0;"
+                            >
+
+                                <option value="">
+                                    Select Status
+                                </option>
+
+                                <option value="Applied">
+                                    Applied
+                                </option>
+
+                                <option value="Under Review">
+                                    Under Review
+                                </option>
+
+                                <option value="Shortlisted">
+                                    Shortlisted
+                                </option>
+
+                                <option value="Rejected">
+                                    Rejected
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        })
+
+
+        .catch(error => {
+
+            console.log(error);
+
+            applicationList.innerHTML = `
+
+                <div class="card">
+
+                    <h2>
+                        Unable to load applications
+                    </h2>
+
+                    <p>
+                        Please make sure the backend
+                        server is running.
+                    </p>
+
+                </div>
+
+            `;
+
+        });
+
+
+    function updateStatus(id, status) {
+
+        if (!status) {
+            return;
+        }
+
+
+        fetch(
+            "http://localhost:3000/api/applications/"
+            + id +
+            "/status",
+            {
+
+                method: "PUT",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    status: status
+                })
+
+            }
+        )
+
+        .then(response =>
+            response.json()
+        )
+
+        .then(data => {
+
+            alert(data.message);
+
+            location.reload();
+
+        })
+
+        .catch(error => {
+
+            console.log(error);
+
+            alert(
+                "Unable to update status."
+            );
+
+        });
+
+    }
+function adminLogout() {
+
+    localStorage.removeItem("adminLoggedIn");
+
+    window.location.href = "admin-login.html";
+
+}
+// Add Company
+
+document.getElementById("companyForm").addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const companyData = {
+
+        name: document.getElementById("companyName").value,
+
+        role: document.getElementById("companyRole").value,
+
+        cgpa: Number(document.getElementById("companyCGPA").value),
+
+        skills: document.getElementById("companySkills").value,
+
+        deadline: document.getElementById("companyDeadline").value
+
+    };
+
+    try {
+
+        const response = await fetch("http://localhost:3000/api/companies", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(companyData)
+
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+
+            alert("Company added successfully!");
+
+            document.getElementById("companyForm").reset();
+
+        } else {
+
+            alert("Error: " + data.message);
+
+        }
+
+    } catch (error) {
+
+        alert("Server error. Please make sure the backend is running.");
+
+        console.error(error);
+
+    }
+
+});
+// Load Companies
+
+fetch("http://localhost:3000/api/companies")
+
+    .then(response => response.json())
+
+    .then(companies => {
+
+        const companyList =
+            document.getElementById("adminCompanyList");
+
+        if (companies.length === 0) {
+
+            companyList.innerHTML = `
+                <div class="card">
+                    <h2>No Companies Announced</h2>
+                    <p>Add a company using the form above.</p>
+                </div>
+            `;
+
+            return;
+        }
+
+        companies.forEach(company => {
+
+            companyList.innerHTML += `
+
+                <div class="company-card">
+
+                    <div style="
+                        width:52px;
+                        height:52px;
+                        border-radius:14px;
+                        background:#eef2ff;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-size:24px;
+                        margin-bottom:18px;
+                    ">
+                        🏢
+                    </div>
+
+                    <h2>${company.name}</h2>
+
+                    <p style="
+                        font-weight:600;
+                        color:#374151;
+                    ">
+                        ${company.role}
+                    </p>
+
+                    <hr>
+
+                    <p>
+                        <strong>Minimum CGPA</strong>
+                    </p>
+
+                    <p>${company.cgpa}</p>
+
+                    <p>
+                        <strong>Required Skills</strong>
+                    </p>
+
+                    <p>${company.skills}</p>
+
+                    <p>
+                        <strong>Application Deadline</strong>
+                    </p>
+
+                    <p>${company.deadline}</p>
+                    <button
+    onclick="removeCompany('${company._id}')"
+    style="
+        margin-top:15px;
+        background:#dc2626;
+        color:white;
+    "
+>
+    🗑️ Remove Company
+</button>
+
+                </div>
+
+            `;
+
+        });
+
+    })
+
+    .catch(error => {
+
+        console.error("Unable to load companies:", error);
+
+        document.getElementById("adminCompanyList").innerHTML = `
+            <div class="card">
+                <h2>Unable to load companies</h2>
+                <p>Please make sure the backend server is running.</p>
+            </div>
+        `;
+    });
+
+    function removeCompany(id) {
+
+    const confirmRemove =
+        confirm("Are you sure you want to remove this company?");
+
+    if (!confirmRemove) {
+        return;
+    }
+
+    fetch(
+        "http://localhost:3000/api/companies/" + id,
+        {
+            method: "DELETE"
+        }
+    )
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        alert(data.message);
+
+        location.reload();
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        alert("Unable to remove company.");
+
+    });
+
+}
+</script>
+
+</body>
+
+</html>
